@@ -1,0 +1,99 @@
+=begin pod :kind<Type> :subkind<class> :category<metamodel>
+
+=TITLE class Metamodel::CoercionHOW
+
+=SUBTITLE Metaclass for type coercions
+
+I<Warning>: this class is part of the Rakudo implementation, and is not
+a part of the language specification.
+
+In signatures, I<type coercions> may be used to change the types of
+arguments or return values from one type to another:
+
+=begin code
+sub sum-length(Numeric:D(Iterable:D) $a, Numeric:D(Iterable:D) $b --> Numeric:D) {
+    $a + $b
+}
+
+say sum-length [1,2,3], gather { .take for 4..6 }; # OUTPUT: «6␤»
+=end code
+
+These coercions are simply type objects. Since types in Raku are first
+class, type coercions such as this can be used anywhere, just like any
+other type object:
+
+=for code
+say Int:D(Str:D).^name; # OUTPUT: «Int:D(Str:D)␤»
+
+C<Metamodel::CoercionHOW> is the HOW for such coercion type objects.
+Internally, the metamethods this metaclass provides are used to handle
+coercing objects from one type to another.
+
+A type coercion like C<Int:D(Str:D)> may also be written like this:
+
+=for code
+my constant IntStr = Metamodel::CoercionHOW.new_type: Int:D, Str:D;
+say IntStr.^name; # OUTPUT: «Int:D(Str:D)␤»
+
+Coercions L<pretend to be|/type/Metamodel::TypePretense> of types C<Any>
+and C<Mu>, and L<delegate|/type/Metamodel::MethodDelegation> methods to
+C<Any>.
+
+=head1 Methods
+
+=begin comment
+
+This method's documentation would make more sense once archetypes are
+documented.
+
+=head2 method archetypes
+
+    method archetypes()
+
+Returns the archetypes this HOW has. This HOW simply has the I<coercive>
+archetype.
+
+=end comment
+
+=head2 method new_type
+
+    method new_type($target, $constraint)
+
+Creates a new coercion type. C<$target> is the target type to which an
+object should be coerced to, while C<$constraint> is the constraint on
+the source type from which an object should be coerced. When no type is
+specified in a type coercion, this type constraint is C<Any>.
+
+=head2 method name
+
+    method name($coercion_type)
+
+Returns the name for the coercion type. Refer to
+L<C<Metamodel::Naming>|/type/Metamodel::Naming> for more information.
+
+=head2 method shortname
+
+    method shortname($coercion_type)
+
+Returns the shortname for the coercion type. Refer to
+L<C<Metamodel::Naming>|/type/Metamodel::Naming> for more information.
+
+=head2 method target_type
+
+    method target_type($coercion_type)
+
+Returns the target type for a type coercion:
+
+=for code
+say Int:D(Str:D).^target_type.^name; # OUTPUT: «Int:D␤»
+
+=head2 method constraint_type
+
+    method constraint_type($coercion_type)
+
+Returns the constraint type for a type coercion:
+
+=for code
+say Int:D(Str:D).^constraint_type.^name; # OUTPUT: «Str:D␤»
+
+=end pod
